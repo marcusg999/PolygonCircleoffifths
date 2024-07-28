@@ -1,0 +1,436 @@
+# PolygonCircleoffifths
+Polygon Circle of fifths App
+<html><head>
+<title>Rotating Polygon Circle of Fifths</title>
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #121212;
+    color: #ffffff;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ff4081;
+    text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+  }
+  #circle {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    position: relative;
+    margin-bottom: 20px;
+  }
+  #polygon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    transition: transform 0.1s linear;
+  }
+  #controls {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  #keyboard {
+    display: flex;
+    margin-top: 30px;
+    max-width: 100%;
+    overflow-x: auto;
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .key {
+    width: 30px;
+    height: 100px;
+    background-color: #ffffff;
+    border: 1px solid #333333;
+    margin-right: 2px;
+    flex-shrink: 0;
+    border-radius: 0 0 5px 5px;
+    transition: background-color 0.3s ease;
+  }
+  .key.black {
+    background-color: #333333;
+    height: 60px;
+    width: 20px;
+    margin-left: -11px;
+    margin-right: -11px;
+    z-index: 2;
+  }
+  .key.active {
+    background-color: #ff4081;
+  }
+  select, button, input[type="range"] {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #2196f3;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  select:hover, button:hover {
+    background-color: #1976d2;
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position-x: 95%;
+    background-position-y: 50%;
+    padding-right: 30px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 10px;
+    background: #2196f3;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  input[type="range"]:hover {
+    opacity: 1;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  #speed-control, #tone-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #speed-value, #tone-value {
+    min-width: 30px;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    #circle {
+      max-width: 300px;
+    }
+    .key {
+      width: 20px;
+      height: 80px;
+    }
+    .key.black {
+      width: 15px;
+      height: 50px;
+      margin-left: -8px;
+      margin-right: -8px;
+    }
+    input[type="range"] {
+      width: 150px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Rotating Polygon Circle of Fifths</h1>
+  <svg id="circle" viewBox="0 0 400 400">
+    <defs>
+      <radialGradient id="noteGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:1" />
+      </radialGradient>
+    </defs>
+    <g id="notes"></g>
+    <g id="trails"></g>
+    <g id="polygon"></g>
+  </svg>
+  <div id="controls">
+    <select id="shape-select">
+      <option value="3">Triangle</option>
+      <option value="4">Square</option>
+      <option value="5">Pentagon</option>
+      <option value="6">Hexagon</option>
+      <option value="7">Heptagon</option>
+      <option value="8">Octagon</option>
+      <option value="9">Nonagon</option>
+      <option value="10">Decagon</option>
+      <option value="11">Hendecagon</option>
+      <option value="12">Dodecagon</option>
+    </select>
+    <button id="reverse">Reverse Direction</button>
+    <button id="toggle-audio">Start Audio</button>
+    <div id="speed-control">
+      <span>Speed:</span>
+      <input type="range" id="speed-slider" min="0.1" max="2" step="0.1" value="0.5">
+      <span id="speed-value">0.5</span>
+    </div>
+    <div id="tone-control">
+      <span>Tone:</span>
+      <select id="tone-select">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+      </select>
+    </div>
+  </div>
+  <div id="keyboard"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
+<script>
+  const notes = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯', 'C♯', 'G♯', 'D♯', 'A♯', 'F'];
+  const noteFrequencies = {
+    'C': 261.63, 'C♯': 277.18, 'D': 293.66, 'D♯': 311.13,
+    'E': 329.63, 'F': 349.23, 'F♯': 369.99, 'G': 392.00,
+    'G♯': 415.30, 'A': 440.00, 'A♯': 466.16, 'B': 493.88
+  };
+  
+  let synth;
+  let angle = 0;
+  let direction = 1;
+  let shape = 3;
+  let activeNotes = new Set();
+  let vortices = [];
+  let trails = [];
+  let notePositions = [];
+  let audioEnabled = false;
+  let rotationSpeed = 0.5;
+  let currentTone = 'sine';
+
+  function createCircle() {
+    const notesGroup = document.getElementById('notes');
+    notes.forEach((note, i) => {
+      const angle = (i * 30 - 90) * (Math.PI / 180);
+      const x = 200 + 180 * Math.cos(angle);
+      const y = 200 + 180 * Math.sin(angle);
+      notePositions.push({x, y});
+      
+      const noteEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      noteEl.setAttribute('cx', x);
+      noteEl.setAttribute('cy', y);
+      noteEl.setAttribute('r', 20);
+      noteEl.setAttribute('fill', 'url(#noteGradient)');
+      noteEl.setAttribute('stroke', '#4a4a4a');
+      noteEl.setAttribute('stroke-width', '2');
+      notesGroup.appendChild(noteEl);
+      
+      const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      textEl.setAttribute('x', x);
+      textEl.setAttribute('y', y);
+      textEl.setAttribute('text-anchor', 'middle');
+      textEl.setAttribute('dominant-baseline', 'central');
+      textEl.setAttribute('fill', '#ffffff');
+      textEl.textContent = note;
+      notesGroup.appendChild(textEl);
+    });
+  }
+
+  function createPolygon(sides) {
+    const polygonGroup = document.getElementById('polygon');
+    polygonGroup.innerHTML = '';
+    const radius = 180;
+    const points = [];
+    vortices = [];
+    for (let i = 0; i < sides; i++) {
+      const angle = (i * 360 / sides - 90) * (Math.PI / 180);
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+      points.push(`${x + 200},${y + 200}`);
+      vortices.push({x, y});
+      
+      const vortex = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      vortex.setAttribute('cx', x + 200);
+      vortex.setAttribute('cy', y + 200);
+      vortex.setAttribute('r', 5);
+      vortex.setAttribute('fill', '#ff4081');
+      polygonGroup.appendChild(vortex);
+    }
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygon.setAttribute('points', points.join(' '));
+    polygon.setAttribute('fill', 'none');
+    polygon.setAttribute('stroke', '#ff4081');
+    polygon.setAttribute('stroke-width', '2');
+    polygonGroup.appendChild(polygon);
+
+    // Clear existing trails
+    trails = [];
+    const trailsGroup = document.getElementById('trails');
+    trailsGroup.innerHTML = '';
+  }
+
+  function rotatePolygon() {
+    angle += direction * rotationSpeed;
+    document.getElementById('polygon').style.transform = `rotate(${angle}deg)`;
+    updateTrails();
+    checkIntersections();
+    requestAnimationFrame(rotatePolygon);
+  }
+
+  function updateTrails() {
+    const trailsGroup = document.getElementById('trails');
+    vortices.forEach((vortex, index) => {
+      const rotatedVortex = rotatePoint(vortex, angle);
+      if (!trails[index]) {
+        trails[index] = [];
+      }
+      trails[index].unshift({x: rotatedVortex.x, y: rotatedVortex.y});
+      if (trails[index].length > 20) {
+        trails[index].pop();
+      }
+    });
+
+    trailsGroup.innerHTML = '';
+    trails.forEach((trail, index) => {
+      const pathData = trail.map((point, i) => {
+        return `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`;
+      }).join(' ');
+      const trailPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      trailPath.setAttribute('d', pathData);
+      trailPath.setAttribute('fill', 'none');
+      trailPath.setAttribute('stroke', `rgba(255, 64, 129, ${1 - index * 0.1})`);
+      trailPath.setAttribute('stroke-width', '2');
+      trailsGroup.appendChild(trailPath);
+    });
+  }
+
+  function checkIntersections() {
+    vortices.forEach((vortex) => {
+      const rotatedVortex = rotatePoint(vortex, angle);
+      notePositions.forEach((notePos, index) => {
+        const distance = Math.sqrt(
+          Math.pow(rotatedVortex.x - notePos.x, 2) +
+          Math.pow(rotatedVortex.y - notePos.y, 2)
+        );
+        if (distance < 10) {
+          playNote(notes[index]);
+        }
+      });
+    });
+  }
+
+  function rotatePoint(point, angle) {
+    const radians = angle * Math.PI / 180;
+    return {
+      x: point.x * Math.cos(radians) - point.y * Math.sin(radians) + 200,
+      y: point.x * Math.sin(radians) + point.y * Math.cos(radians) + 200
+    };
+  }
+
+  function playNote(note) {
+    if (!activeNotes.has(note) && audioEnabled) {
+      activeNotes.add(note);
+      synth.triggerAttackRelease(noteFrequencies[note], '8n');
+      updateKeyboard();
+      setTimeout(() => {
+        activeNotes.delete(note);
+        updateKeyboard();
+      }, 500);
+    }
+  }
+
+  function createKeyboard() {
+    const keyboard = document.getElementById('keyboard');
+    const keys = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+    keys.forEach((key, index) => {
+      const keyEl = document.createElement('div');
+      keyEl.className = 'key';
+      keyEl.dataset.note = key;
+      if (key.includes('♯')) {
+        keyEl.className += ' black';
+      }
+      keyboard.appendChild(keyEl);
+    });
+  }
+
+  function updateKeyboard() {
+    document.querySelectorAll('.key').forEach(key => {
+      key.classList.toggle('active', activeNotes.has(key.dataset.note));
+    });
+  }
+
+  function toggleAudio() {
+    if (audioEnabled) {
+      synth.dispose();
+      audioEnabled = false;
+      document.getElementById('toggle-audio').textContent = 'Start Audio';
+    } else {
+      initAudio();
+      audioEnabled = true;
+      document.getElementById('toggle-audio').textContent = 'Stop Audio';
+    }
+  }
+
+  function initAudio() {
+    synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: {
+        type: currentTone
+      }
+    }).toDestination();
+    Tone.start();
+    console.log('Audio is ready');
+  }
+
+  createCircle();
+  createPolygon(shape);
+  createKeyboard();
+  rotatePolygon();
+
+  document.getElementById('shape-select').addEventListener('change', (e) => {
+    shape = parseInt(e.target.value);
+    createPolygon(shape);
+  });
+
+  document.getElementById('reverse').addEventListener('click', () => {
+    direction *= -1;
+  });
+
+  document.getElementById('toggle-audio').addEventListener('click', toggleAudio);
+
+  const speedSlider = document.getElementById('speed-slider');
+  const speedValue = document.getElementById('speed-value');
+
+  speedSlider.addEventListener('input', (e) => {
+    rotationSpeed = parseFloat(e.target.value);
+    speedValue.textContent = rotationSpeed.toFixed(1);
+  });
+
+  document.getElementById('tone-select').addEventListener('change', (e) => {
+    currentTone = e.target.value;
+    if (audioEnabled) {
+      synth.dispose();
+      initAudio();
+    }
+  });
+</script>
+</body></html>
